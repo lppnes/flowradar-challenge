@@ -57,6 +57,17 @@ Check with web browser:
 - Redoc: <http://localhost:10002/redoc>
 - OpenAPI JSON: <http://localhost:10002/openapi.json>
 
+### 5. 🧹 Format check before submission
+
+After finishing development, miners must check formatting for their submission file using Ruff:
+
+```sh
+ruff --config volumes/configs/.ruff.toml --check src/flr_challenge/challenge/flowradar/src/submissions.py
+```
+
+> [!CAUTION]
+> Miners should not use any type of bypass technique.
+
 ---
 
 ## 🏗️ Build Docker Image
