@@ -6,6 +6,14 @@ hide:
 
 # 📌 Release Notes
 
+## v1.1.0 (2026-05-11)
+
+<!-- Release notes generated using configuration in .github/release.yml at main -->
+
+
+
+**Full Changelog**: https://github.com/RedTeamSubnet/flowradar-challenge/compare/v1.0.3...v1.1.0
+
 ## v1.0.3 (2026-05-03)
 
 <!-- Release notes generated using configuration in .github/release.yml at main -->
