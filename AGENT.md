@@ -51,6 +51,21 @@ Additional rule:
 
 Keep logic efficient and resilient to avoid request failures/timeouts.
 
+## Submission Constraints (Mandatory)
+
+- Implement a pure Python solution in `submissions.py`.
+- Focus on algorithmic logic and pattern finding from the dataset.
+- Do not use binary tree modules, model-based logic, or blob-style packaged model artifacts.
+- Binary tree, hashing-heavy shortcuts, or training-module run patterns are discouraged for this challenge.
+- Keep the submission implementation at or under 1000 lines.
+
+Formatting and linting requirements:
+
+- Run Ruff checks before finalizing, as shown in `examples/miner_commit/README.md`.
+- Command:
+  - `ruff --config volumes/configs/.ruff.toml --check src/flr_challenge/challenge/flowradar/src/submissions.py`
+- Bypass techniques are not accepted (for example: `# noqa` abuse or format-ignore bypass patterns).
+
 ## Skills
 
 ### 1) challenge-setup
