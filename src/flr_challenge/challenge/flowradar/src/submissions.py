@@ -1,7 +1,14 @@
-import logging
 from typing import Any
 
-logger = logging.getLogger(__name__)
+
+def _num(features: dict[str, Any], key: str) -> float:
+    value = features.get(key, 0)
+    if value in (None, ""):
+        return 0.0
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return 0.0
 
 
 def detect_vpn(features: dict[str, Any]) -> bool:
@@ -14,46 +21,37 @@ def detect_vpn(features: dict[str, Any]) -> bool:
     Returns:
         True if VPN is detected, False otherwise.
     """
-    logger.info("Processing VPN detection request...")
+    flow_duration = max(_num(features, "flow_duration"), 1.0)
+    fwd_num_pkts = _num(features, "fwd_num_pkts")
+    bwd_num_pkts = _num(features, "bwd_num_pkts")
+    total_pkts = fwd_num_pkts + bwd_num_pkts
+    if total_pkts <= 0:
+        return False
 
-    try:
-        fwd_num_pkts = features.get("fwd_num_pkts", 0)
-        bwd_num_pkts = features.get("bwd_num_pkts", 0)
-        fwd_sum_pkt_len = features.get("fwd_sum_pkt_len", 0)
-        bwd_sum_pkt_len = features.get("bwd_sum_pkt_len", 0)
-        flow_duration = features.get("flow_duration", 0)
+    fwd_sum_pkt_len = _num(features, "fwd_sum_pkt_len")
+    bwd_sum_pkt_len = _num(features, "bwd_sum_pkt_len")
+    byte_ratio = bwd_sum_pkt_len / max(fwd_sum_pkt_len, 1.0)
+    pkts_per_ms = total_pkts / flow_duration
 
-        logger.info(
-            f"Features - fwd_num_pkts: {fwd_num_pkts}, bwd_num_pkts: {bwd_num_pkts}, "
-            f"fwd_sum_pkt_len: {fwd_sum_pkt_len}, bwd_sum_pkt_len: {bwd_sum_pkt_len}, "
-            f"flow_duration: {flow_duration}"
+    max_mean_iat = max(_num(features, "fwd_mean_iat"), _num(features, "bwd_mean_iat"))
+    max_std_iat = max(_num(features, "fwd_std_iat"), _num(features, "bwd_std_iat"))
+    max_iat = max(_num(features, "fwd_max_iat"), _num(features, "bwd_max_iat"))
+
+    score = sum(
+        (
+            flow_duration >= 1000,
+            flow_duration >= 1800,
+            max_mean_iat >= 85,
+            max_std_iat >= 120,
+            max_iat >= 280,
+            _num(features, "fwd_max_pkt_len") >= 1650,
+            _num(features, "fwd_std_pkt_len") >= 460,
+            flow_duration >= 900 and pkts_per_ms < 0.018,
+            byte_ratio > 1.15,
         )
+    )
 
-        # Heuristic 1: Check if backward packets are significantly larger than forward packets
-        # This is often the case with VPN traffic as the server sends more data back
-        if fwd_sum_pkt_len > 0:
-            ratio = bwd_sum_pkt_len / fwd_sum_pkt_len
-            logger.info(f"Backward/Forward packet length ratio: {ratio}")
-            if ratio > 1.2:
-                logger.info("VPN detected based on packet length ratio")
-                return True
-
-        # Heuristic 2: Check total packets vs flow duration
-        total_pkts = fwd_num_pkts + bwd_num_pkts
-        if flow_duration > 0:
-            pkts_per_ms = total_pkts / flow_duration
-            logger.info(f"Packets per millisecond: {pkts_per_ms}")
-            if pkts_per_ms < 0.005:  # Low packet rate indicates potential VPN
-                logger.info("VPN detected based on low packet rate")
-                return True
-
-        # If no heuristic matched, assume not VPN
-        logger.info("No VPN indicators found, returning False")
-        return False
-
-    except Exception as e:
-        logger.error(f"Error processing features: {e}")
-        return False
+    return score >= 5
 
 
 __all__ = ["detect_vpn"]
