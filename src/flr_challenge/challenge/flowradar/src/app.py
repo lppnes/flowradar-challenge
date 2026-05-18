@@ -8,6 +8,7 @@ from data_types import VPNDetectionInput, VPNDetectionOutput
 from submissions import detect_vpn
 
 logger = logging.getLogger(__name__)
+VPN_INPUT_BODY = Body(...)
 logging.basicConfig(
     stream=sys.stdout,
     level=logging.INFO,
@@ -26,7 +27,7 @@ def health():
 
 @app.post("/vpn_detector", response_model=VPNDetectionOutput)
 def fingerprint(
-    request: Request, vpn_input: VPNDetectionInput = Body(...)
+    request: Request, vpn_input: VPNDetectionInput = VPN_INPUT_BODY
 ) -> VPNDetectionOutput:
     logger.info("Processing fingerprint request...")
     # Generate a unique request ID for tracing
@@ -44,7 +45,7 @@ def fingerprint(
         )
     except Exception as err:
         logger.error(f"Failed to process fingerprint: {str(err)}")
-        raise HTTPException(status_code=500, detail="Failed to process fingerprint.")
+        raise HTTPException(status_code=500, detail="Failed to process fingerprint.") from err
 
 
 __all__ = ["app"]
