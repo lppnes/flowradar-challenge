@@ -7,7 +7,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 
 WORKDIR /app
 
-ENV PORT=8000
+ENV PORT=10002
 
 # Install python dependencies
 COPY requirements.txt .
