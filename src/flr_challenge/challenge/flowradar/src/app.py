@@ -50,9 +50,7 @@ def _solve(request: Request, payload: Any) -> VPNDetectionOutput:
         )
     except Exception as err:
         logger.error(f"Failed to process FlowRadar request: {str(err)}")
-        raise HTTPException(
-            status_code=500, detail="Failed to process request."
-        ) from err
+        raise HTTPException(status_code=500, detail="Failed to process request.") from err
 
 
 @app.get("/health")
@@ -61,9 +59,7 @@ def health():
 
 
 @app.post("/solve", response_model=VPNDetectionOutput)
-def solve(
-    request: Request, payload: dict[str, Any] = VPN_INPUT_BODY
-) -> VPNDetectionOutput:
+def solve(request: Request, payload: dict[str, Any] = VPN_INPUT_BODY) -> VPNDetectionOutput:
     return _solve(request, payload)
 
 
